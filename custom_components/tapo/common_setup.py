@@ -5,12 +5,12 @@ from datetime import timedelta
 from dataclasses import dataclass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from plugp100 import TapoApiClient, TapoDeviceState
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from homeassistant.helpers.update_coordinator import UpdateFailed
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.debounce import Debouncer
 from custom_components.tapo.const import (
@@ -59,6 +59,7 @@ async def setup_tapo_coordinator(
     if not coordinator.last_update_success:
         raise Exception("Failed to retrieve first tapo data")
 
+
     return coordinator
 
 
@@ -89,7 +90,7 @@ class TapoUpdateCoordinator(DataUpdateCoordinator[TapoDeviceState]):
             async with async_timeout.timeout(10):
                 return await self._update_with_fallback()
         except Exception as exception:
-            raise UpdateFailed() from exception
+            raise PlatformNotReady() from exception
 
     async def _update_with_fallback(self, retry=True):
         try:
